@@ -23,6 +23,16 @@ class LocMess(object):
         User(username=username, password=pwd_hash)
 
     @db_session
+    def login(self, username, password):
+        res = User.get(username=username,
+                       password=self._get_password_hash(password))
+        if res is None:
+            return None  # login failed
+        token = self._generate_token(username)
+        self._update_user_token(username, token)
+        return token
+
+    @db_session
     def get_user(self, username):
         """
         Returns the User object with the provided username.
