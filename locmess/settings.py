@@ -1,3 +1,6 @@
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
 # TODO: this needs to be done in a different way, this is just a quick hack
 USE_TEST_DB = False
 
