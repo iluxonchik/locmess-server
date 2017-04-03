@@ -29,6 +29,68 @@ even the **logout** one, (for security reasons). To get a new token, simply
 login again, all of the previous sessions will be re-generated, since the
 token will be updated.
 
+## Location
+
+All locations are specified in JSON.
+
+GPS Location Format:
+
+```
+{
+    "latitude" : 123,
+    "longitude": 456,
+    "radius": 1992
+}
+```
+
+SSID Location Format:
+
+```
+{
+    "SSIDs": ["eduroam", "ElGato", "TheDocumentary", "MEO-WiFi"]
+}
+```
+
+There is an attribute on the `Location` table that indicated whether the location
+is a GPS one or an SSID one (`is_gps` boolean).
+
+### Example requests
+
+New Location:
+
+```
+{
+    "username":"thegame", "token":"gAAAAABY4bKwzNXJrqgZlh7F3W_MvZMB62HJc2ujLU9D-mfmp8Z6kI6zSnvTlOo-sKM3NERFo5jdCWjUMwKBU_3oZ2Ysq1AthQ==",
+    "name":"Dre's House",
+    "is_gps": "True",
+    "location_json": "{\"latitude\":123, \"longitude\":456, \"radius\":1992}"
+}
+```
+
+Get Location:
+
+(request)
+```
+{
+    "username":"thegame", "token":"gAAAAABY4brfZfvacThtwbfZxUZvSlYbum31kL1ULCFdQhI5jrP8jY73wmBdTKSsH0WIKcPkbmz_i69gm-jY2YpvpgkGaA4wsw==",
+    "name":"Dre's House"
+}
+```
+
+(response)
+```
+{
+  "name": "Dre's House",
+  "author": "thegame",
+  "is_gps": true,
+  "location": "{\"latitude\":123, \"longitude\":456, \"radius\":1992}"
+}
+```
+
+## Messages
+
+### Creating A New Message
+
 ### Notes/Comments
 
 * After first login, send the token with every operation you perform on the server
