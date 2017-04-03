@@ -115,7 +115,7 @@ class MessageTestCase(BaseTestCase):
         self._lm.add_location('TheGame', token, name='Dres House', is_gps=True,
             location_json=json.dumps(location))
 
-        loc = self._lm.get_location_by_name(name='Dres House')
+        loc = self._lm.get_location_by_name('TheGame', token, name='Dres House')
         self.assertIsNotNone(loc)
         self.assertTrue(loc.is_gps)
 

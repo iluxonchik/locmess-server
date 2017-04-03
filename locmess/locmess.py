@@ -100,7 +100,8 @@ class LocMess(object):
         return loc
 
     @db_session
-    def get_location_by_name(self, name):
+    @authentication_required
+    def get_location_by_name(self, username, token, name):
         logging.debug('Getting location "{}" by name'.format(name))
         return Location.get(name=name)
 
