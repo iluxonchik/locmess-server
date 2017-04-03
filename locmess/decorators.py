@@ -13,9 +13,23 @@ def authentication_required(f):
     def decorated_function(*args, **kwargs):
         # handle case if first argument is "self"
         start_index = 0 if isinstance(args[0], str) else 1
+        use_kwargs = False
+        username = None
+        try:
+            username = args[start_index]
+        except IndexError as e:
+            # username being passed as kwargs
+            username=kwargs['username']
+            use_kwargs = True
 
-        username = args[start_index]
-        token = args[start_index + 1]
+        token = None
+        if use_kwargs:
+            token = kwargs['token']
+        else:
+            try:
+                token = args[start_index + 1]
+            except IndexError as e:
+                token = kwargs['token']
 
         u = User.get(username=username)
 
