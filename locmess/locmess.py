@@ -124,7 +124,7 @@ class LocMess(object):
     @authentication_required
     def get_available_messages_by_ssid(self, username, token, my_ssids):
         logging.debug('Request for available messages by SSID list')
-        logging.debug('\t My SSID List: {}', my_ssids)
+        logging.debug('\t My SSID List: {}'.format(my_ssids))
         msgs = self._get_messages_in_ssid_range(my_ssids)
         return msgs
 
@@ -180,7 +180,7 @@ class LocMess(object):
             if ssid in ssid_list:
                 logging.debug('\t* {} is in {}'.format(ssid, ssid_list))
                 return True
-        logging.debug('\t* {} is not in list {}'.format(ssid, ssid_list))
+            logging.debug('\t* {} is not in list {}'.format(ssid, ssid_list))
         return False
 
     def _parse_ssid_location_from_json(self, location_json):
