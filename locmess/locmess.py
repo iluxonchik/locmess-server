@@ -121,13 +121,36 @@ class LocMess(object):
         return msgs
 
     @db_session
+    @authentication_required
+    def get_available_messages_by_ssid(self, username, token, my_ssids):
+        logging.debug('Request for available messages by SSID list')
+        logging.debug('\t My SSID List: {}', my_ssids)
+        msgs = self._get_messages_in_ssid_range(my_ssids)
+        return msgs
+
+    @db_session
+    def _get_messages_in_ssid_range(self, my_ssids):
+        ssid_msgs = select(m for m in Message
+                             if not m.location.is_gps)
+        ssid_msgs_in_range = self._filter_ssid_msgs_in_range(ssid_msgs, my_ssids)
+        return ssid_msgs_in_range
+
+    def _filter_ssid_msgs_in_range(self, ssid_msgs, my_ssids):
+            res = [msg for msg in ssid_msgs
+                       if self._is_in_range_from_ssid_list(msg.location.location,
+                                                            my_ssids)
+                  ]
+            res_without_duplicates = set(res)
+            return res_without_duplicates
+
+    @db_session
     def _get_messages_in_range(self, curr_coord):
         gps_msgs = select(m for m in Message
                             if m.location.is_gps)
         gps_msgs_in_range = self._filter_msgs_in_range(gps_msgs, curr_coord)
         return gps_msgs_in_range
 
-
+    @db_session
     def _filter_msgs_in_range(self, msgs, curr_coord):
         res = [msg for msg in msgs
                    if self._is_in_range_from_json_coord(
@@ -150,6 +173,20 @@ class LocMess(object):
         radius = location['radius']
 
         return ((latitude, longitude), radius)
+
+    def _is_in_range_from_ssid_list(self, ssid_list, my_ssids):
+        ssid_list = self._parse_ssid_location_from_json(ssid_list)
+        for ssid in my_ssids:
+            if ssid in ssid_list:
+                logging.debug('\t* {} is in {}'.format(ssid, ssid_list))
+                return True
+        logging.debug('\t* {} is not in list {}'.format(ssid, ssid_list))
+        return False
+
+    def _parse_ssid_location_from_json(self, location_json):
+        ssid_location = json.loads(location_json)
+        ssid_list = ssid_location['ssids']
+        return ssid_list
 
     def _is_in_range(self, ref_coord, my_coord, radius):
         return self._get_distance_in_between_coordinates_in_meters(ref_coord, my_coord) <= radius
