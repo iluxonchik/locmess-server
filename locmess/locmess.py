@@ -167,7 +167,12 @@ class LocMess(object):
 
 
     def _parse_location_from_json(self, location_json):
-        location = json.loads(location_json)
+        # support both: passing location as a json string or as a json obj
+        if isinstance(location_json, dict):
+            location = location_json
+        else:
+            location = json.loads(location_json)
+
         latitude = location['latitude']
         longitude = location['longitude']
         radius = location['radius']
@@ -184,7 +189,12 @@ class LocMess(object):
         return False
 
     def _parse_ssid_location_from_json(self, location_json):
-        ssid_location = json.loads(location_json)
+        # support both: passing location as a json string or as a json obj
+        if isinstance(location_json, dict):
+            ssid_location = location_json
+        else:
+            ssid_location = json.loads(location_json)
+
         ssid_list = ssid_location['ssids']
         return ssid_list
 
