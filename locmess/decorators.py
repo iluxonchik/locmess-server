@@ -38,7 +38,7 @@ def authentication_required(f):
         # NOTE: aware of information leakage if exception messages are returned
         # to the client unchanged
         if u is None:
-            raise UserNotFoundError('User "{}"" not found.'.format(username))
+            raise UserNotFoundError('User "{}" not found.'.format(username))
 
         if u.token != token:
             raise TokenInvalidError('Token "{}" is invalid for user "{}".'.format(token, username))

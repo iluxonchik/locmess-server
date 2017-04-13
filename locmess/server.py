@@ -23,6 +23,7 @@ GET_LOCATION = '/get/location'   # {username, token, name}
 # Message realted
 NEW_MESSAGE = '/new/message'  # {username, token, title, location_name, text, is_centralized, is_black_list, properties, valid_from?, valid_until?, is_visible?}
 GET_GPS_MESSAGES = '/get/message/gps' # {username, token, curr_coord}
+GET_SSID_MESSAGES = '/get/message/ssid'
 
 lm = LocMess()
 
@@ -66,6 +67,8 @@ class Server(BaseHTTPRequestHandler):
             self.add_message(json_dict)
         if GET_GPS_MESSAGES in path:
             self.get_gps_messages(json_dict)
+        if GET_SSID_MESSAGES in path:
+            self.get_ssid_messsages(json_dict)
 
 
     @handle_expcetions
@@ -176,6 +179,19 @@ class Server(BaseHTTPRequestHandler):
         json_msgs = [json.dumps(self._msg_to_json_dict(msg)) for msg in msgs]
         msgs_dict = {
                         'messages': json_msgs
+                    }
+        self._respond_json(msgs_dict)
+
+    @handle_expcetions
+    def get_ssid_messsages(self, args):
+        # {username, token, my_ssids}
+        logging.debug('### get_ssid_messsages() ###')
+        username, token = self._parse_auth(args)
+        my_ssids = args['my_ssids']
+        msgs = lm.get_available_messages_by_ssid(username, token, my_ssids)
+        json_msgs = [json.dumps(self._msg_to_json_dict(msg)) for msg in msgs]
+        msgs_dict = {
+                        'messages': json_msgs,
                     }
         self._respond_json(msgs_dict)
 
