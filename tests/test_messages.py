@@ -287,12 +287,71 @@ class MessageTestCase(BaseTestCase):
         self.assertCountEqual(actual_profile_key_value_dict,
                                                 expected_prfile_key_value_dict)
 
-    def test_blacklist_messages(self):
-        # profiles that match DON'T receive messages
-        pass
+    @db_session
+    def test_blacklist_and_whitelist_messages(self):
+        # BLACKLIST: profiles that match DON'T receive messages
+        # WHITELIST: ONLY profiles that MATCH receive the messages
+        username = 'Dr.Dre'
+        self._lm.add_user(username=username, password='TheDocumentary')
+        token = self._lm.login(username=username, password='TheDocumentary')
+
+        key1 = 'Favorite Album'
+        value1 = '2001'
+        self._lm.update_key(username, token, key1, value1)
+
+        key2 = 'Favourite Album Contender'
+        value2 = 'The Chronic'
+        self._lm.update_key(username, token, key2, value2)
 
 
+        location = {'latitude': 1.0001, 'longitude': 1.0001, 'radius': 200}
+        loc1 = self._lm.add_location(username, token, name='Dres House', is_gps=True,
+            location_json=json.dumps(location))
 
-    def test_whitelist_messages(self):
-        # ONLY profiles that MATCH receive the messages
-        pass
+        # msg1 will NOT be received by the user
+        msg1_props = {
+                            key1: value1,
+                            key2: value2,
+                     }
+        msg_1 = self._lm.add_message(username, token, title='Question',
+                             location=loc1,
+                             text='Would you do it if my name was Dre?',
+                             is_centralized=True,
+                             is_black_list=True,
+                             properties=json.dumps(msg1_props))
+
+        # msg2 WILL be be received by the user
+        msg2_props = {
+                            key1: value1,
+                            key2: value2,
+                     }
+        msg_2 = self._lm.add_message(username, token, title='Another Question',
+                             location=loc1,
+                             text='Would you do it if my name was Dre?',
+                             is_centralized=True,
+                             is_black_list=False,
+                             properties=json.dumps(msg2_props))
+
+        # msg3 WILL be be received by the user (null policy)
+        msg_3 = self._lm.add_message(username, token, title='One More Question',
+                             location=loc1,
+                             text='Would you do it if my name was Dre?',
+                             is_centralized=True,
+                             is_black_list=False,
+                             properties=json.dumps({}))
+
+        # msg4 WILL be be received by the user (null policy)
+        msg_4 = self._lm.add_message(username, token, title='And Once Again',
+                             location=loc1,
+                             text='Would you do it if my name was Dre?',
+                             is_centralized=True,
+                             is_black_list=False,
+                             properties=json.dumps({}))
+
+        my_location = (1, 1)
+
+        messages = self._lm.get_available_messages_by_gps(username,
+                token, curr_coord=my_location)
+
+        self.assertEqual(len(messages), 3, 'Unexpected number of matching messages')
+        self.assertCountEqual([msg_2, msg_3, msg_4], messages, 'Unexpected matching messages')
