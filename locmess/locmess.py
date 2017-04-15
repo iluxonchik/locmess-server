@@ -241,3 +241,97 @@ class LocMess(object):
         """
         u = User.get(username=username)
         u.token = token
+
+    ### Profile Related ###
+
+    @db_session
+    @authentication_required
+    def update_key(self, username, token, key, value):
+        """
+        Updates or adds (if does not exist) the key-value pair to the user's
+        profile.
+        """
+        logging.debug('### update_key() ###')
+        u = User.get(username=username)
+        kvp = u.kvp
+
+        if kvp is None:
+            logging.warning('\tKVP for user "{}" is None, instantiating'.format(username))
+            kvp = {}
+        else:
+            kvp = json.loads(kvp)
+
+        logging.debug('\tAssociating {}:{} for user {}'.format(key, value, username))
+        kvp[key] = value
+        u.kvp = json.dumps(kvp)
+
+    @db_session
+    @authentication_required
+    def delete_key(self, username, token, key):
+        """
+        Deltes the key-value pair with the provided key from the user's
+        profile. If a pair with that key does not exist, it's ignored.
+        """
+        logging.debug('### delete_key() ###')
+        u = User.get(username=username)
+        kvp = u.kvp
+
+        if kvp is None:
+            logging.warning('\tKVP is None for user {}'.format(username))
+            return
+        else:
+            kvp = json.loads(kvp)
+
+        try:
+            logging.debug('\tDeleting key {} for user {}'.format(key, username))
+            del kvp[key]
+            u.kvp = json.dumps(kvp)
+        except KeyError:
+            # all good: deleting a non-existing key, just ignore
+            logging.debug('\t\t[!!] Key {} was non-existent'.format(key))
+            pass
+
+    @db_session
+    @authentication_required
+    def get_value(self, username, token, key):
+        """
+        Returns the value indexed by the specified key. If there is no entry
+        indexed by that key, None is returned.
+        """
+        logging.debug('### get_value() ###')
+        u = User.get(username=username)
+        kvp = u.kvp
+
+        if kvp is None:
+            logging.warning('\tKVP is None for user {}'.format(username))
+            return None
+        else:
+            kvp = json.loads(kvp)
+
+        try:
+            logging.debug('\tGetting value for key {} for user {}'.format(key, username))
+            value = kvp[key]
+            logging.debug('\t\tValue for key {} is {}'.format(key, value))
+            return value
+        except KeyError:
+            # key-value entry does not exist, return None
+            logging.warning('\t\t[!!]Key {} not found'.format(key))
+            return None
+
+    @db_session
+    @authentication_required
+    def get_key_value_bin(self, username, token):
+        """
+        Returns the key-value dictionary for this user.
+        """
+        logging.debug('### get_key_value_bin ###')
+        u = User.get(username=username)
+        kvp = u.kvp
+
+        if kvp is None:
+            logging.warning('\tKVP is None for user {}'.format(username))
+            return {}
+        else:
+            kvp = json.loads(kvp)
+
+        return kvp

@@ -9,6 +9,7 @@ class User(db.Entity):
     username = Required(str, unique=True)
     password = Required(str)
     token = Optional(bytes)
+    kvp = Optional(Json)
     locations = Set('Location')
     messages = Set('Message')
 
@@ -18,7 +19,6 @@ class Location(db.Entity):
     is_gps = Required(bool)  # True: GPS; False: WiFi APs
     location = Required(Json)
     messages = Set('Message')
-
 
 class Message(db.Entity):
     author = Required(User)
