@@ -219,3 +219,80 @@ class MessageTestCase(BaseTestCase):
         self.assertEqual(parsed_json['latitude'], 19)
         self.assertEqual(parsed_json['longitude'], 92)
         self.assertEqual(parsed_json['radius'], 1992)
+
+
+    def test_user_profile_keys(self):
+        """
+        Test user profile keys.
+
+        All of the tests are in the same method: yes, bad test design, but
+        we're in a hurry, and hey, the tests are stil here.
+        """
+        username = 'KittyCent'
+        self._lm.add_user(username=username, password='PowerOfTheKitten')
+        token = self._lm.login(username=username, password='PowerOfTheKitten')
+
+        expected_value = 'value1'
+        self._lm.update_key(username, token, 'key1', expected_value)
+        value_of_key1 = self._lm.get_value(username, token, 'key1')
+        self.assertEqual(value_of_key1, expected_value, 'Key-Value mismatch')
+
+        # let's get a value of a non-existing key
+        value_of_key2 = self._lm.get_value(username, token, 'key2')
+        self.assertIsNone(value_of_key2, 'Non-existing key value is not None')
+
+        # Let's delete an existing key
+        self._lm.delete_key(username, token, 'key1')
+        value_of_key1 = self._lm.get_value(username, token, 'key1')
+        self.assertIsNone(value_of_key1, 'Key not deleted')
+
+        # Let's delete an non-existing key (make sure it's ignored)
+        self._lm.delete_key(username, token, 'key2')
+        value_of_key2 = self._lm.get_value(username, token, 'key2')
+        self.assertIsNone(value_of_key2, 'Non-existing key not deleted')
+
+        # Let's add a key ...
+        expected_value = 'value1'
+        self._lm.update_key(username, token, 'key1', expected_value)
+        value_of_key1 = self._lm.get_value(username, token, 'key1')
+        self.assertEqual(value_of_key1, expected_value, 'Key-Value mismatch')
+
+        # ... amd then update the existing key's value
+        expected_value = 'new value'
+        self._lm.update_key(username, token, 'key1', expected_value)
+        value_of_key1 = self._lm.get_value(username, token, 'key1')
+        self.assertEqual(value_of_key1, expected_value, 'Key-Value mismatch')
+
+        # Let's add many key-values
+        expected_key1 = 'key1'
+        expected_value1 = 'value1'
+
+        expected_key2 = 'key2'
+        expected_value2 = 'value2'
+
+        expected_key3 = 'key3'
+        expected_value3 = 'value3'
+
+        self._lm.update_key(username, token, expected_key1, expected_value1)
+        self._lm.update_key(username, token, expected_key2, expected_value2)
+        self._lm.update_key(username, token, expected_key3, expected_value3)
+
+        expected_prfile_key_value_dict = {
+                                            expected_key1 : expected_value1,
+                                            expected_key2 : expected_value2,
+                                            expected_key3 : expected_value3,
+                                         }
+        actual_profile_key_value_dict = self._lm.get_key_value_bin(username, token)
+
+        self.assertCountEqual(actual_profile_key_value_dict,
+                                                expected_prfile_key_value_dict)
+
+    def test_blacklist_messages(self):
+        # profiles that match DON'T receive messages
+        pass
+
+
+
+    def test_whitelist_messages(self):
+        # ONLY profiles that MATCH receive the messages
+        pass
