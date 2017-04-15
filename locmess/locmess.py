@@ -118,6 +118,7 @@ class LocMess(object):
         """
         logging.debug('Request for available messages by GPS corrdinates')
         msgs = self._get_messages_in_range(curr_coord)
+        msgs = self._filter_messages_by_properties(msgs, username, token)
         return msgs
 
     @db_session
@@ -126,6 +127,7 @@ class LocMess(object):
         logging.debug('Request for available messages by SSID list')
         logging.debug('\t My SSID List: {}'.format(my_ssids))
         msgs = self._get_messages_in_ssid_range(my_ssids)
+        msgs = self._filter_messages_by_properties(msgs, username, token)
         return msgs
 
     @db_session
@@ -335,3 +337,27 @@ class LocMess(object):
             kvp = json.loads(kvp)
 
         return kvp
+
+    @db_session
+    def _filter_messages_by_properties(self, msgs, username, token):
+        res = []
+        u = User.get(username=username)
+        for msg in msgs:
+            msg_props = json.loads(msg.properties)
+
+            if msg_props == {}:
+                res += [msg]
+                continue
+
+            u_kvp = self.get_key_value_bin(username, token)
+            if msg.is_black_list:
+                # profiles that match DON'T receive messages
+                # blacklist policy
+                if not msg_props == u_kvp:
+                    res += [msg]
+            else:
+                # whitelist polict
+                # ONLY profiles that MATCH receive the messages
+                if msg_props == u_kvp:
+                    res += [msg]
+        return res
