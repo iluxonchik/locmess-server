@@ -252,6 +252,8 @@ class LocMess(object):
         """
         Updates or adds (if does not exist) the key-value pair to the user's
         profile.
+
+        To remove a key, simply update it with the None value.
         """
         logging.debug('### update_key() ###')
         u = User.get(username=username)

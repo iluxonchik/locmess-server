@@ -25,6 +25,11 @@ NEW_MESSAGE = '/new/message'  # {username, token, title, location_name, text, is
 GET_GPS_MESSAGES = '/get/message/gps' # {username, token, curr_coord}
 GET_SSID_MESSAGES = '/get/message/ssid'
 
+# Profile related
+UPDATE_KEY = '/profile/key/update' # {username, token, key, value}
+DELETE_KEY = '/profile/key/delete' # {username, token, key, value}
+GET_KEY_VALUE_BIN = '/get/profile/keys' # {username, token}
+
 lm = LocMess()
 
 # HTTPRequestHandler class
@@ -69,7 +74,12 @@ class Server(BaseHTTPRequestHandler):
             self.get_gps_messages(json_dict)
         if GET_SSID_MESSAGES in path:
             self.get_ssid_messsages(json_dict)
-
+        if UPDATE_KEY in path:
+            self.update_profile_key(json_dict)
+        if DELETE_KEY in path:
+            self.delete_profile_key(json_dict)
+        if GET_KEY_VALUE_BIN in path:
+            self.get_key_value_bin(json_dict)
 
     @handle_expcetions
     def login(self, args):
@@ -194,6 +204,27 @@ class Server(BaseHTTPRequestHandler):
                         'messages': json_msgs,
                     }
         self._respond_json(msgs_dict)
+
+    @handle_expcetions
+    def update_profile_key(self, args):
+        username, token = self._parse_auth(args)
+        key = args['key']
+        value = args['value']
+        lm.update_key(username, token, key, value)
+        self._send_OK_headers()
+
+    @handle_expcetions
+    def delete_profile_key(self, args):
+        username, token = self._parse_auth(args)
+        key = args['key']
+        lm.delete_key(username, token, key)
+        self._send_OK_headers()
+
+    @handle_expcetions
+    def get_key_value_bin(self, args):
+        username, token = self._parse_auth(args)
+        res = lm.get_key_value_bin(username, token)
+        self._respond_json(res)
 
 
     def _msg_to_json_dict(self, msg_obj):
