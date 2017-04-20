@@ -15,11 +15,30 @@ The server will start on port 8081
 
 ## Endpoints
 
+**User Related:**
 * NEW_USER : '/new/user' {username, password} -> {}
 * LOGIN : '/login' {username, password} -> {token}
 * LOGOUT : '/logout' {username, token} ->
 
+**Location Related:**
 
+* NEW_LOCATION : '/new/location'  {username, token, name, is_gps, location_json } -> {}
+* GET_LOCATION = '/get/location'  {username, token, name} -> {res, author, is_gps, location}
+
+**Message Related:**
+
+* NEW_MESSAGE : '/new/message' {username, token, title, location_name, text, is_centralized, is_black_list, properties, valid_from?, valid_until?} -> {}
+* GET_GPS_MESSAGES : '/get/message/gps' {username, token, curr_coord} -> {"messages":[{username, token, msg_id, title, location_name, text, is_centralized, is_black_list, properties, valid_from?, valid_until?}]}
+* GET_SSID_MESSAGES : '/get/message/ssid' {username, token, curr_coord} -> {"messages":[{username, token, msg_id, title, location_name, text, is_centralized, is_black_list, properties, valid_from?, valid_until?}]}
+
+**Profile Related:**
+
+* UPDATE_KEY : '/profile/key/update' # {username, token, key, value} -> {}
+* DELETE_KEY : '/profile/key/delete' # {username, token, key, value} -> {}
+* GET_KEY_VALUE_BIN : '/get/profile/keys' # {username, token} -> {key1: value, key2: value2, ...}
+
+In the same directory as this file is located, you will find a .json file which you can import
+into the [Advanced REST Client](https://chrome.google.com/webstore/detail/advanced-rest-client/hgmloofddffdnphfgcellkdfbfbjeloo). It will be updated as new things are added/changed in the server.
 
 ## User login
 
