@@ -21,7 +21,7 @@ NEW_LOCATION =  '/new/location'  # {username, token, name, is_gps, location_json
 GET_LOCATION = '/get/location'   # {username, token, name}
 
 # Message realted
-NEW_MESSAGE = '/new/message'  # {username, token, title, location_name, text, is_centralized, is_black_list, properties, valid_from?, valid_until?, is_visible?}
+NEW_MESSAGE = '/new/message'  # {username, token, title, location_name, text, is_centralized, is_black_list, properties, valid_from?, valid_until?}
 GET_GPS_MESSAGES = '/get/message/gps' # {username, token, curr_coord}
 GET_SSID_MESSAGES = '/get/message/ssid'
 
@@ -137,7 +137,7 @@ class Server(BaseHTTPRequestHandler):
     def add_message(self, args):
          # {
          #    username, token, title, location_name, text, is_centralized,
-         #    is_black_list, properties, valid_from?, valid_until?, is_visible?
+         #    is_black_list, properties, valid_from?, valid_until?
          # }
          username, token = self._parse_auth(args)
          title = args['title']
@@ -159,14 +159,8 @@ class Server(BaseHTTPRequestHandler):
 
          valid_until = None
          try:
-             valid_until = args['valid_from']
+             valid_until = args['valid_until']
              valid_until = dateutil.parser.parse(valid_until)
-         except KeyError as e:
-             pass
-
-         is_visible = None
-         try:
-             is_visible = args['valid_from']
          except KeyError as e:
              pass
 
@@ -239,7 +233,6 @@ class Server(BaseHTTPRequestHandler):
                         'valid_until': msg_obj.valid_until.isoformat(),
                         'time_posted': msg_obj.time_posted.isoformat(),
                         'properties': msg_obj.properties,
-                        'is_visible': msg_obj.is_visible
                    }
         return msg_dict
 

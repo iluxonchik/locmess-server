@@ -62,8 +62,7 @@ class LocMess(object):
     @authentication_required
     def add_message(self, username, token, title, location, text,
                     is_centralized=True, is_black_list=True,
-                    valid_from=None, valid_until=None,
-                    is_visible=True, properties=None):
+                    valid_from=None, valid_until=None, properties=None):
         """
         Adds a new message.
         """
@@ -85,8 +84,7 @@ class LocMess(object):
             msg = Message(author=author, title=title, location=location,
             text=text,
             is_centralized=is_centralized, is_black_list=is_black_list,
-            valid_until=valid_until, properties=properties,
-            is_visible=is_visible)
+            valid_until=valid_until, properties=properties)
 
         return msg
 

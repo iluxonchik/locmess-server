@@ -31,7 +31,5 @@ class Message(db.Entity):
     valid_until = Required(datetime, default=datetime.max)
     time_posted = Required(datetime, default=datetime.now())
     properties = Required(Json)
-    is_visible = Required(bool, default=True)
-
 
 db.generate_mapping(create_tables=True)
