@@ -13,3 +13,6 @@ class UserNotFoundError(ValueError):
 
 class TokenInvalidError(ValueError):
     pass
+
+class AuthorizationError(ValueError):
+    pass

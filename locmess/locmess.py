@@ -14,7 +14,7 @@ from haversine import haversine
 from datetime import datetime
 
 from base64 import b64encode, b64decode
-from locmess.exceptions import UserAlreadyExistsError
+from locmess.exceptions import UserAlreadyExistsError, AuthorizationError
 
 class LocMess(object):
 
@@ -87,6 +87,25 @@ class LocMess(object):
             valid_until=valid_until, properties=properties)
 
         return msg
+
+    @db_session
+    @authentication_required
+    def delete_message(self, username, password, msg_id):
+        msg_obj = Message.get(id=msg_id)
+
+        if not msg_obj:
+            # if no message with such id found, just ignore
+            logging.warning('[!!] Request to delete message with id {},'
+            ' which does NOT exist. Ignoring request...'.format(msg_id))
+            return
+
+        requestor = User.get(username=username)
+        if msg_obj.author != requestor:
+            raise AuthorizationError('User \'{}\' cannot delete message with '
+            'id {}, since that message was created by \'{}\''.format(username,
+            msg_id, msg_obj.author))
+
+        msg_obj.delete()
 
     @db_session
     @authentication_required
