@@ -114,6 +114,7 @@ class Server(BaseHTTPRequestHandler):
         lm.add_location(username, token, name, is_gps, location_json)
         self._send_OK_headers()
 
+    @db_session
     @handle_expcetions
     def get_location(self, args):
         # { username, token, name }
