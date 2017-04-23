@@ -1,5 +1,6 @@
 from locmess import settings
 from locmess.settings import logging
+from locmess.exceptions import AuthorizationError
 
 import os
 import requests
@@ -355,3 +356,97 @@ class MessageTestCase(BaseTestCase):
 
         self.assertEqual(len(messages), 3, 'Unexpected number of matching messages')
         self.assertCountEqual([msg_2, msg_3, msg_4], messages, 'Unexpected matching messages')
+
+
+    @db_session
+    def test_delete_message(self):
+        username = 'Dr.Dre'
+        self._lm.add_user(username=username, password='TheDocumentary')
+        token = self._lm.login(username=username, password='TheDocumentary')
+
+
+        location = {'ssids': ['MEO-WiFi', 'eduroam']}
+        loc1 = self._lm.add_location(username, token, name='Dres House', is_gps=False,
+            location_json=json.dumps(location))
+
+        location = {'ssids': ['NOS-WiFi']}
+        loc2 = self._lm.add_location(username, token, name='Game\'s House', is_gps=False,
+            location_json=json.dumps(location))
+
+        location = {'ssids': ['eduroam', 'Kitty Cent']}
+        loc3 = self._lm.add_location(username, token, name='Other House', is_gps=False,
+            location_json=json.dumps(location))
+
+        location = {'ssids': ['Kitty Cent', 'MEO-WiFi']}
+        loc4 = self._lm.add_location(username, token, name='Catspotting Spot',
+        is_gps=False, location_json=json.dumps(location))
+
+        location = {'ssids': ['ElGato', 'Doctor\'s advocate']}
+        loc5 = self._lm.add_location(username, token, name='Kittens Library',
+        is_gps=False, location_json=json.dumps(location))
+
+        msg_1 = self._lm.add_message(username, token, title='Question',
+                             location=loc1,
+                             text='Would you do it if my name was Dre?',
+                             is_centralized=True,
+                             is_black_list=False,
+                             properties=json.dumps({}))
+
+        msg_2 = self._lm.add_message(username, token, title='Another Question',
+                             location=loc2,
+                             text='Would you do it if my name was Dre?',
+                             is_centralized=True,
+                             is_black_list=False,
+                             properties=json.dumps({}))
+
+        msg_3 = self._lm.add_message(username, token, title='One More Question',
+                             location=loc3,
+                             text='Would you do it if my name was Dre?',
+                             is_centralized=True,
+                             is_black_list=False,
+                             properties=json.dumps({}))
+
+        msg_4 = self._lm.add_message(username, token, title='How bout another one?',
+                             location=loc4,
+                             text='Would you do it if my name was Dre?',
+                             is_centralized=True,
+                             is_black_list=False,
+                             properties=json.dumps({}))
+
+        msg_5 = self._lm.add_message(username, token, title='And one more time',
+                             location=loc5,
+                             text='Would you do it if my name was Dre?',
+                             is_centralized=True,
+                             is_black_list=False,
+                             properties=json.dumps({}))
+
+        expected_messages = [msg_1, msg_2, msg_3, msg_4, msg_5]
+        all_msgs = [msg for msg in Message.select()]
+        self.assertCountEqual(expected_messages, all_msgs,
+                                                    'Unexpected message colleciton.')
+
+        # Let's try to delete a message
+        self._lm.delete_message(username, token, msg_3.id)
+        expected_messages = [msg_1, msg_2, msg_4, msg_5]
+        all_msgs = [msg for msg in Message.select()]
+        self.assertCountEqual(expected_messages, all_msgs, 'Message deletion error.')
+
+        # Let's try to delete the same message twice (make sure it's ignored)
+        self._lm.delete_message(username, token, msg_3.id)
+        expected_messages = [msg_1, msg_2, msg_4, msg_5]
+        all_msgs = [msg for msg in Message.select()]
+        self.assertCountEqual(expected_messages, all_msgs, 'Message deletion error.')
+
+        # Now let's try to delete a message with the user who did not create it
+        username = 'If_You_Ever_Knew_Dre_You_Would_Say_I_Was_The_New_Dre'
+        self._lm.add_user(username=username, password='TheDocumentary')
+        token = self._lm.login(username=username, password='TheDocumentary')
+
+        with self.assertRaises(AuthorizationError):
+            self._lm.delete_message(username, token, msg_1.id)
+
+        # Make sure that the state was not changed
+        expected_messages = [msg_1, msg_2, msg_4, msg_5]
+        all_msgs = [msg for msg in Message.select()]
+        self.assertCountEqual(expected_messages, all_msgs,
+                                                    'Database state not preserved.')
