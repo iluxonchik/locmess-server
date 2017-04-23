@@ -36,6 +36,30 @@ lm = LocMess()
 # HTTPRequestHandler class
 class Server(BaseHTTPRequestHandler):
 
+
+    def __init__(self, *args, **kwargs):
+        # NOTE: do all of the setup and then call the super's __init__.
+        # After digging into the source code, I found out that BaseRequestHandler
+        # (parent of BaseHTTPRequestHandler) calls handle() in its constructor,
+        # so that means that the overriden do_* methods will be called straight
+        # away, beofore running any other code in Server's __init__.
+        # https://github.com/python/cpython/blob/master/Lib/socketserver.py#L695
+        self.RES_FUNC = {
+            LOGIN: self.login,
+            NEW_USER: self.add_user,
+            LOGOUT: self.logout,
+            NEW_LOCATION: self.add_location,
+            GET_ALL_LOCATIONS: self.get_all_locations,
+            GET_LOCATION: self.get_location,
+            NEW_MESSAGE: self.add_message,
+            GET_GPS_MESSAGES: self.get_gps_messages,
+            GET_SSID_MESSAGES: self.get_ssid_messsages,
+            UPDATE_KEY: self.update_profile_key,
+            DELETE_KEY: self.delete_profile_key,
+            GET_KEY_VALUE_BIN: self.get_key_value_bin,
+        }
+        super(Server, self).__init__(*args, **kwargs)
+
     def do_GET(self):
         logging.debug(self.path)
         logging.debug(self.headers['content'])
@@ -59,32 +83,8 @@ class Server(BaseHTTPRequestHandler):
         logging.debug('Loaded json: ')
         logging.debug(json_dict)
 
-        if LOGIN in path:
-            self.login(json_dict)
-        elif NEW_USER in path:
-            self.add_user(json_dict)
-        elif LOGOUT in path:
-            self.logout(json_dict)
-        elif NEW_LOCATION in path:
-            self.add_location(json_dict)
-        elif GET_ALL_LOCATIONS in path:
-            # NOTE: must be above GET_LOCATION!
-            # (I know, bad design, don't do this in real-life code)
-            self.get_all_locations(json_dict)
-        elif GET_LOCATION in path:
-            self.get_location(json_dict)
-        elif NEW_MESSAGE in path:
-            self.add_message(json_dict)
-        elif GET_GPS_MESSAGES in path:
-            self.get_gps_messages(json_dict)
-        elif GET_SSID_MESSAGES in path:
-            self.get_ssid_messsages(json_dict)
-        elif UPDATE_KEY in path:
-            self.update_profile_key(json_dict)
-        elif DELETE_KEY in path:
-            self.delete_profile_key(json_dict)
-        elif GET_KEY_VALUE_BIN in path:
-            self.get_key_value_bin(json_dict)
+        dispatch_function = self.RES_FUNC.get(self.path, self.invalid_endpoint_err)
+        dispatch_function(json_dict)
 
     @handle_expcetions
     def login(self, args):
@@ -100,6 +100,9 @@ class Server(BaseHTTPRequestHandler):
         self._send_OK_headers()
         self._respond_json(ret_json)
 
+
+    def invalid_endpoint_err(self, args):
+        self._send_UNAUTH_headers('\'{}\' is an invalid endpoint.'.format(self.path))
 
     @handle_expcetions
     def add_user(self, args):
@@ -130,7 +133,6 @@ class Server(BaseHTTPRequestHandler):
         res_list = [self._locations_to_json_dict(loc) for loc in locations]
 
         self._respond_json(res_list)
-
 
     @db_session
     @handle_expcetions
@@ -272,6 +274,16 @@ class Server(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header('Content-type','application/json')
         self.end_headers()
+
+    def _send_UNAUTH_headers(self, msg=None):
+        self.send_response(401)
+        self.send_header('Content-type','application/json')
+        self.end_headers()
+
+        if msg:
+            ret_json = {'error': msg}
+            ret_json = json.dumps(ret_json)
+            self.wfile.write(ret_json.encode())
 
     def _parse_auth(self, args):
         return (args['username'], args['token'].encode())

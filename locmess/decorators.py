@@ -49,8 +49,7 @@ def authentication_required(f):
 def handle_expcetions(f):
     """
     Handles any excepitons and returns the error message, as well as a 401
-    response code back to the client. If everything goes well, headers are
-    set to the "OK" state (201 response code).
+    response code back to the client.
 
     IMPORTANT: must only be used within BaseHTTPRequestHandler.
     """
