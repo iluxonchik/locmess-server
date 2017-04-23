@@ -19,6 +19,7 @@ LOGOUT = '/logout' # {username, token}
 # Location related
 NEW_LOCATION =  '/new/location'  # {username, token, name, is_gps, location_json }
 GET_LOCATION = '/get/location'   # {username, token, name}
+GET_ALL_LOCATIONS = '/get/location/all' # {username, token, name}
 
 # Message realted
 NEW_MESSAGE = '/new/message'  # {username, token, title, location_name, text, is_centralized, is_black_list, properties, valid_from?, valid_until?}
@@ -60,25 +61,29 @@ class Server(BaseHTTPRequestHandler):
 
         if LOGIN in path:
             self.login(json_dict)
-        if NEW_USER in path:
+        elif NEW_USER in path:
             self.add_user(json_dict)
-        if LOGOUT in path:
+        elif LOGOUT in path:
             self.logout(json_dict)
-        if NEW_LOCATION in path:
+        elif NEW_LOCATION in path:
             self.add_location(json_dict)
-        if GET_LOCATION in path:
+        elif GET_ALL_LOCATIONS in path:
+            # NOTE: must be above GET_LOCATION!
+            # (I know, bad design, don't do this in real-life code)
+            self.get_all_locations(json_dict)
+        elif GET_LOCATION in path:
             self.get_location(json_dict)
-        if NEW_MESSAGE in path:
+        elif NEW_MESSAGE in path:
             self.add_message(json_dict)
-        if GET_GPS_MESSAGES in path:
+        elif GET_GPS_MESSAGES in path:
             self.get_gps_messages(json_dict)
-        if GET_SSID_MESSAGES in path:
+        elif GET_SSID_MESSAGES in path:
             self.get_ssid_messsages(json_dict)
-        if UPDATE_KEY in path:
+        elif UPDATE_KEY in path:
             self.update_profile_key(json_dict)
-        if DELETE_KEY in path:
+        elif DELETE_KEY in path:
             self.delete_profile_key(json_dict)
-        if GET_KEY_VALUE_BIN in path:
+        elif GET_KEY_VALUE_BIN in path:
             self.get_key_value_bin(json_dict)
 
     @handle_expcetions
@@ -113,6 +118,19 @@ class Server(BaseHTTPRequestHandler):
         name, is_gps, location_json = args['name'], args['is_gps'], args['location_json']
         lm.add_location(username, token, name, is_gps, location_json)
         self._send_OK_headers()
+
+    @db_session
+    @handle_expcetions
+    def get_all_locations(self, args):
+        # { username, token }
+        logging.info('# get_location #')
+        username, token = self._parse_auth(args)
+
+        locations = lm.get_all_locations(username, token)
+        res_list = [self._locations_to_json_dict(loc) for loc in locations]
+
+        self._respond_json(res_list)
+
 
     @db_session
     @handle_expcetions
@@ -221,6 +239,14 @@ class Server(BaseHTTPRequestHandler):
         res = lm.get_key_value_bin(username, token)
         self._respond_json(res)
 
+    def _locations_to_json_dict(self, loc_obj):
+        res_dict = {
+                        'name':   loc_obj.name,
+                        'author': loc_obj.author.username,
+                        'is_gps': loc_obj.is_gps,
+                        'location': loc_obj.location,
+        }
+        return res_dict
 
     def _msg_to_json_dict(self, msg_obj):
         msg_dict = {    'msg_id': msg_obj.id,
