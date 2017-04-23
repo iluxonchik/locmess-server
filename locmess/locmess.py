@@ -105,6 +105,15 @@ class LocMess(object):
 
     @db_session
     @authentication_required
+    def get_all_locations(self, username, token):
+        """
+        Returns all of the locaitons in the databse.
+        """
+        res = [loc for loc in Location.select()]
+        return res
+
+    @db_session
+    @authentication_required
     def get_available_messages_by_gps(self, username, token, curr_coord):
         """
         Gets a list of available messages for the user in the provided
