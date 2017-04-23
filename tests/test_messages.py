@@ -450,3 +450,78 @@ class MessageTestCase(BaseTestCase):
         all_msgs = [msg for msg in Message.select()]
         self.assertCountEqual(expected_messages, all_msgs,
                                                     'Database state not preserved.')
+
+    @db_session
+    def test_get_my_messages(self):
+        username1 = 'Dr.Dre'
+        self._lm.add_user(username=username1, password='TheDocumentary')
+        token1 = self._lm.login(username=username1, password='TheDocumentary')
+
+        username2 = 'Kitty_Cent'
+        self._lm.add_user(username=username2, password='TheDocumentary')
+        token2 = self._lm.login(username=username2, password='TheDocumentary')
+
+        location = {'ssids': ['MEO-WiFi', 'eduroam']}
+        loc1 = self._lm.add_location(username1, token1, name='Dres House', is_gps=False,
+            location_json=json.dumps(location))
+
+        location = {'ssids': ['NOS-WiFi']}
+        loc2 = self._lm.add_location(username1, token1, name='Game\'s House', is_gps=False,
+            location_json=json.dumps(location))
+
+        location = {'ssids': ['eduroam', 'Kitty Cent']}
+        loc3 = self._lm.add_location(username2, token2, name='Other House', is_gps=False,
+            location_json=json.dumps(location))
+
+        location = {'ssids': ['Kitty Cent', 'MEO-WiFi']}
+        loc4 = self._lm.add_location(username2, token2, name='Catspotting Spot',
+        is_gps=False, location_json=json.dumps(location))
+
+        location = {'ssids': ['ElGato', 'Doctor\'s advocate']}
+        loc5 = self._lm.add_location(username2, token2, name='Kittens Library',
+        is_gps=False, location_json=json.dumps(location))
+
+        msg_1 = self._lm.add_message(username1, token1, title='Question',
+                             location=loc1,
+                             text='Would you do it if my name was Dre?',
+                             is_centralized=True,
+                             is_black_list=False,
+                             properties=json.dumps({}))
+
+        msg_2 = self._lm.add_message(username1, token1, title='Another Question',
+                             location=loc2,
+                             text='Would you do it if my name was Dre?',
+                             is_centralized=True,
+                             is_black_list=False,
+                             properties=json.dumps({}))
+
+
+        msg_3 = self._lm.add_message(username2, token2, title='One More Question',
+                             location=loc3,
+                             text='Would you do it if my name was Dre?',
+                             is_centralized=True,
+                             is_black_list=False,
+                             properties=json.dumps({}))
+
+        msg_4 = self._lm.add_message(username2, token2, title='How bout another one?',
+                             location=loc4,
+                             text='Would you do it if my name was Dre?',
+                             is_centralized=True,
+                             is_black_list=False,
+                             properties=json.dumps({}))
+
+        msg_5 = self._lm.add_message(username2, token2, title='And one more time',
+                             location=loc5,
+                             text='Would you do it if my name was Dre?',
+                             is_centralized=True,
+                             is_black_list=False,
+                             properties=json.dumps({}))
+
+        expected_user1_msgs = [msg_1, msg_2]
+        expected_user2_msgs = [msg_3, msg_4, msg_5]
+
+        usr1_res = self._lm.get_my_messages(username1, token1)
+        self.assertCountEqual(expected_user1_msgs, usr1_res, 'Unexpected messages for user')
+
+        usr2_res = self._lm.get_my_messages(username2, token2)
+        self.assertCountEqual(expected_user2_msgs, usr2_res, 'Unexpected messages for user')
