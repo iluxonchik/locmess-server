@@ -25,6 +25,7 @@ GET_ALL_LOCATIONS = '/get/location/all' # {username, token, name}
 NEW_MESSAGE = '/new/message'  # {username, token, title, location_name, text, is_centralized, is_black_list, properties, valid_from?, valid_until?}
 GET_GPS_MESSAGES = '/get/message/gps' # {username, token, curr_coord}
 GET_SSID_MESSAGES = '/get/message/ssid'
+DELETE_MESSAGE = '/delete/message' # {username, token, msg_id}
 
 # Profile related
 UPDATE_KEY = '/profile/key/update' # {username, token, key, value}
@@ -57,6 +58,7 @@ class Server(BaseHTTPRequestHandler):
             UPDATE_KEY: self.update_profile_key,
             DELETE_KEY: self.delete_profile_key,
             GET_KEY_VALUE_BIN: self.get_key_value_bin,
+            DELETE_MESSAGE: self.delete_message,
         }
         super(Server, self).__init__(*args, **kwargs)
 
@@ -219,6 +221,13 @@ class Server(BaseHTTPRequestHandler):
                         'messages': json_msgs,
                     }
         self._respond_json(msgs_dict)
+
+    @handle_expcetions
+    def delete_message(self, args):
+        username, token = self._parse_auth(args)
+        msg_id = args['msg_id']
+        lm.delete_message(username, token, msg_id)
+        self._send_OK_headers()
 
     @handle_expcetions
     def update_profile_key(self, args):

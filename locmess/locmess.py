@@ -106,6 +106,7 @@ class LocMess(object):
             msg_id, msg_obj.author))
 
         msg_obj.delete()
+        logging.debug('Deleted message with id {}'.format(msg_id))
 
     @db_session
     @authentication_required
