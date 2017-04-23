@@ -110,6 +110,12 @@ class LocMess(object):
 
     @db_session
     @authentication_required
+    def get_my_messages(self, username, token):
+        res = [msg for msg in Message.select(lambda msg: msg.author.username == username)]
+        return res
+
+    @db_session
+    @authentication_required
     def add_location(self, username, token, name, is_gps, location_json):
         author = self.get_user(username)
         logging.debug('Adding location "{}" is_gps: {},'
