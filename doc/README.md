@@ -24,6 +24,8 @@ The server will start on port 8081
 
 * NEW_LOCATION : '/new/location'  {username, token, name, is_gps, location_json } -> {}
 * GET_LOCATION = '/get/location'  {username, token, name} -> {res, author, is_gps, location}
+* GET_ALL_LOCATIONS = '/get/location/all'  {username, token, name} -> [res, author, is_gps, location}, ...]
+
 
 **Message Related:**
 
