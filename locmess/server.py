@@ -222,7 +222,7 @@ class Server(BaseHTTPRequestHandler):
 
 
     def _msg_to_json_dict(self, msg_obj):
-        msg_dict = {
+        msg_dict = {    'msg_id': msg_obj.id,
                         'author': msg_obj.author.username,
                         'title': msg_obj.title,
                         'location': msg_obj.location.location,

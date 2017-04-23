@@ -342,8 +342,14 @@ class LocMess(object):
     def _filter_messages_by_properties(self, msgs, username, token):
         res = []
         u = User.get(username=username)
+
         for msg in msgs:
-            msg_props = json.loads(msg.properties)
+            msg_props = msg.properties
+
+            # if msg.properties is sotored as a string rather than as a JSON
+            # object, parse it into a dict (backwards compatibility)
+            if isinstance(msg_props, str):
+                msg_props = json.loads(msg_props)
 
             if msg_props == {}:
                 res += [msg]
