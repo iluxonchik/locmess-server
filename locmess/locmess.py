@@ -110,6 +110,26 @@ class LocMess(object):
 
     @db_session
     @authentication_required
+    def delete_location(self, username, password, location_name):
+        location = Location.get(name=location_name)
+
+        if not location:
+            # if no message with such id found, just ignore
+            logging.warning('[!!] Request to delete location with name {},'
+            ' which does NOT exist. Ignoring request...'.format(location_name))
+            return
+
+        requestor = User.get(username=username)
+        if location.author != requestor:
+            raise AuthorizationError('User \'{}\' cannot delete location with '
+            'name {}, since that location was created by \'{}\''.format(username,
+            location_name, location.author))
+
+        location.delete()
+        logging.debug('Deleted location with name {}'.format(location_name))
+
+    @db_session
+    @authentication_required
     def get_my_messages(self, username, token):
         res = [msg for msg in Message.select(lambda msg: msg.author.username == username)]
         return res
