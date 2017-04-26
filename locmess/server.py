@@ -20,6 +20,7 @@ LOGOUT = '/logout' # {username, token}
 NEW_LOCATION =  '/new/location'  # {username, token, name, is_gps, location_json }
 GET_LOCATION = '/get/location'   # {username, token, name}
 GET_ALL_LOCATIONS = '/get/location/all' # {username, token, name}
+DELETE_LOCATION = '/location/delete' # {username, token, location_name}
 
 # Message realted
 NEW_MESSAGE = '/new/message'  # {username, token, title, location_name, text, is_centralized, is_black_list, properties, valid_from?, valid_until?}
@@ -53,6 +54,7 @@ class Server(BaseHTTPRequestHandler):
             NEW_LOCATION: self.add_location,
             GET_ALL_LOCATIONS: self.get_all_locations,
             GET_LOCATION: self.get_location,
+            DELETE_LOCAITON: self.delete_location,
             NEW_MESSAGE: self.add_message,
             GET_GPS_MESSAGES: self.get_gps_messages,
             GET_SSID_MESSAGES: self.get_ssid_messsages,
@@ -156,6 +158,13 @@ class Server(BaseHTTPRequestHandler):
         logging.info('\t\t{}'.format(res_dict))
 
         self._respond_json(res_dict)
+
+    @handle_expcetions
+    def delete_message(self, args):
+        username, token = self._parse_auth(args)
+        location_name = args['location_name']
+        lm.delete_location(username, token, location_name)
+        self._send_OK_headers()
 
     @db_session
     @handle_expcetions
