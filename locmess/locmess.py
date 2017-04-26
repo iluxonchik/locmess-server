@@ -172,6 +172,7 @@ class LocMess(object):
         logging.debug('Request for available messages by GPS corrdinates')
         msgs = self._get_messages_in_range(curr_coord)
         msgs = self._filter_messages_by_properties(msgs, username, token)
+        msgs = self._filter_messages_by_date(msgs)
         return msgs
 
     @db_session
@@ -181,6 +182,7 @@ class LocMess(object):
         logging.debug('\t My SSID List: {}'.format(my_ssids))
         msgs = self._get_messages_in_ssid_range(my_ssids)
         msgs = self._filter_messages_by_properties(msgs, username, token)
+        msgs = self._filter_messages_by_date(msgs)
         return msgs
 
     @db_session
@@ -197,6 +199,11 @@ class LocMess(object):
                   ]
             res_without_duplicates = set(res)
             return res_without_duplicates
+
+    def _filter_messages_by_date(self, messages):
+        curr_date = datetime.now()
+        res = [msg for msg in messages if curr_date <= msg.valid_until]
+        return res
 
     @db_session
     def _get_messages_in_range(self, curr_coord):
