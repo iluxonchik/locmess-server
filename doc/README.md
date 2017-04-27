@@ -30,10 +30,10 @@ The server will start on port 8081
 **Message Related:**
 
 * NEW_MESSAGE : '/new/message' {username, token, title, location_name, text, is_centralized, is_black_list, properties, valid_from?, valid_until?} -> {}
-* GET_GPS_MESSAGES : '/get/message/gps' {username, token, curr_coord} -> {"messages":[{username, token, msg_id, title, location_name, text, is_centralized, is_black_list, properties, valid_from?, valid_until?}]}
-* GET_SSID_MESSAGES : '/get/message/ssid' {username, token, curr_coord} -> {"messages":[{username, token, msg_id, title, location_name, text, is_centralized, is_black_list, properties, valid_from?, valid_until?}]}
+* GET_GPS_MESSAGES : '/get/message/gps' {username, token, curr_coord} -> {"messages":[{author, msg_id, title, location, text, is_centralized, is_black_list, properties, valid_from?, valid_until?}]}
+* GET_SSID_MESSAGES : '/get/message/ssid' {username, token, curr_coord} -> {"messages":[{author, msg_id, title, location, text, is_centralized, is_black_list, properties, valid_from?, valid_until?}]}
 * DELETE_MESSAGE = '/delete/message' # {username, token, msg_id} -> {}
-* GET_MY_MESSAGES = '/get/message/my' # {username, token} -> [username, token, msg_id, title, location_name, text, is_centralized, is_black_list, properties, valid_from?, valid_until?, ...]
+* GET_MY_MESSAGES = '/get/message/my' # {username, token} -> [author, msg_id, title, location, text, is_centralized, is_black_list, properties, valid_from?, valid_until?, ...]
 
 **Profile Related:**
 

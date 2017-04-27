@@ -54,7 +54,7 @@ class Server(BaseHTTPRequestHandler):
             NEW_LOCATION: self.add_location,
             GET_ALL_LOCATIONS: self.get_all_locations,
             GET_LOCATION: self.get_location,
-            DELETE_LOCAITON: self.delete_location,
+            DELETE_LOCATION: self.delete_location,
             NEW_MESSAGE: self.add_message,
             GET_GPS_MESSAGES: self.get_gps_messages,
             GET_SSID_MESSAGES: self.get_ssid_messsages,
@@ -160,7 +160,7 @@ class Server(BaseHTTPRequestHandler):
         self._respond_json(res_dict)
 
     @handle_expcetions
-    def delete_message(self, args):
+    def delete_location(self, args):
         username, token = self._parse_auth(args)
         location_name = args['location_name']
         lm.delete_location(username, token, location_name)
