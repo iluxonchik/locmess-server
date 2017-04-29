@@ -240,6 +240,7 @@ class Server(BaseHTTPRequestHandler):
         lm.delete_message(username, token, msg_id)
         self._send_OK_headers()
 
+    @db_session
     @handle_expcetions
     def get_my_messages(self, args):
         username, token = self._parse_auth(args)
