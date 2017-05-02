@@ -173,6 +173,7 @@ class Server(BaseHTTPRequestHandler):
          #    username, token, title, location_name, text, is_centralized,
          #    is_black_list, properties, valid_from?, valid_until?
          # }
+         logging.info("### add_message ###")
          username, token = self._parse_auth(args)
          title = args['title']
          location_name = args['location_name']
@@ -187,7 +188,9 @@ class Server(BaseHTTPRequestHandler):
          valid_from = None
          try:
              valid_from = args['valid_from']
+             logging.debug("\tRaw valid_from: {}".format(valid_from))
              valid_from = dateutil.parser.parse(valid_from)
+             logging.debug("\tParsed valid_from: {}".format(valid_from))
          except KeyError as e:
              pass
 

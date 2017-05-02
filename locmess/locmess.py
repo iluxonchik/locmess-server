@@ -67,7 +67,7 @@ class LocMess(object):
         Adds a new message.
         """
         if valid_from is None:
-            valid_from = datetime.now
+            valid_from = datetime.now()
         if valid_until is None:
             valid_until = datetime.max
         if properties is None:
@@ -84,6 +84,7 @@ class LocMess(object):
             msg = Message(author=author, title=title, location=location,
             text=text,
             is_centralized=is_centralized, is_black_list=is_black_list,
+            valid_from=valid_from,
             valid_until=valid_until, properties=properties)
 
         return msg
