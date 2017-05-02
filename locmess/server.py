@@ -282,7 +282,7 @@ class Server(BaseHTTPRequestHandler):
         msg_dict = {    'msg_id': msg_obj.id,
                         'author': msg_obj.author.username,
                         'title': msg_obj.title,
-                        'location': msg_obj.location.location,
+                        'location': msg_obj.location.name,
                         'text': msg_obj.text,
                         'is_centralized': msg_obj.is_centralized,
                         'is_black_list': msg_obj.is_black_list,
