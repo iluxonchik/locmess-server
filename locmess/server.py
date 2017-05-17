@@ -208,7 +208,7 @@ class Server(BaseHTTPRequestHandler):
 
          self._send_OK_headers()
 
-
+    @db_session
     @handle_expcetions
     def get_gps_messages(self, args):
         # { username, token, curr_coord }
@@ -223,6 +223,7 @@ class Server(BaseHTTPRequestHandler):
                     }
         self._respond_json(msgs_dict)
 
+    @db_session
     @handle_expcetions
     def get_ssid_messsages(self, args):
         # {username, token, my_ssids}
