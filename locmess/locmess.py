@@ -215,6 +215,8 @@ class LocMess(object):
         return res
 
     def _is_in_range_from_json_coord(self, json_coord, curr_coord):
+        curr_coord = [format(curr_coord[0],'.6f'), format(curr_coord[1],'.6f')]
+        print("\n\n", json_coord, curr_coord, "\n\n")
         loc_coord, radius = self._parse_location_from_json(json_coord)
         logging.debug('Parsed location: '
                       'latitude={}, longitude={}, radius={}'.format(
@@ -255,9 +257,14 @@ class LocMess(object):
         return ssid_list
 
     def _is_in_range(self, ref_coord, my_coord, radius):
-        return self._get_distance_in_between_coordinates_in_meters(ref_coord, my_coord) <= radius
+        aux = [my_coord[1], my_coord[0]]
+        my_coord = aux
+        print(self._get_distance_in_between_coordinates_in_meters(ref_coord, my_coord) <= int(radius))
+        return self._get_distance_in_between_coordinates_in_meters(ref_coord, my_coord) <= int(radius)
 
     def _get_distance_in_between_coordinates_in_meters(self, coord1, coord2):
+        coord1 = [float(coord1[0]), float(coord1[1])]
+        coord2 = [float(coord2[0]), float(coord2[1])]
         return haversine(coord1, coord2) * 1000
 
     def _get_password_hash(self, str_user, str_pwd):
